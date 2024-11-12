@@ -29,9 +29,9 @@ android {
     signingConfigs {
         prod {
             keyAlias 'parkkey-employee'
-            keyPassword 'Parkkey@123'
-            storeFile file('/Users/deependrasingh/Desktop/pppp/parkkey-jks/parkkey-employee-jks')
-            storePassword 'Parkkey@123'
+            keyPassword 'yash2002'
+            storeFile file('parkkey-employee.jks')
+            storePassword 'yash2002'
         }
     }
 

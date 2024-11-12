@@ -49,7 +49,9 @@ class _ApprovedFragmentState extends State<ApprovedFragment> {
   bool isLoadingList = true;
   bool isError = false;
   String vehicleNo = "";
-  String? mobileNo = "";
+  String mobileNo = "";
+  String unmaskedMobileNo = ""; // To store the unmasked number for API use
+
   bool isFetchingMNo = false;
   static String initialCharges = "";
   static String paymentMode = "";
@@ -58,7 +60,7 @@ class _ApprovedFragmentState extends State<ApprovedFragment> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    populateList();
+     populateList();
     checkIsConfirmedTicket();
   }
 
@@ -77,768 +79,749 @@ class _ApprovedFragmentState extends State<ApprovedFragment> {
     double heightParent = MediaQuery.of(context).size.height;
     return SafeArea(
         child: Scaffold(
-          body: Material(
+      body: Material(
+        child: Container(
+          height: MediaQuery.of(context).size.height,
+          child: Stack(
+            children: [
+              Column(
+                children: [
+                  Expanded(
+                    flex: 1,
+                    child: Container(
+                      width: widthParent,
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.only(
+                              bottomLeft: Radius.circular(30),
+                              bottomRight: Radius.circular(30)),
+                          color:
+                              Color(CustomColors.PURPLE_DARK).withOpacity(0.7)),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 3,
+                    child: ClipPath(
+                      clipper: LoginScreenClipper2(),
+                      child: Container(
+                        //height: double.infinity-2,
+                        width: MediaQuery.of(context).size.width,
+                        decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                          begin: Alignment.centerLeft,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Color(CustomColors.PURPLE_DARK).withOpacity(0.4),
+                            Color(CustomColors.PURPLE_DARK).withOpacity(0.2)
+                          ],
+                        )),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              ClipPath(
+                clipper: LoginDoneClipper1(),
                 child: Container(
-                 height: MediaQuery.of(context).size.height,
-                  child: Stack(
+                  height: 150,
+                  width: MediaQuery.of(context).size.width,
+                  decoration:
+                      BoxDecoration(color: Color(CustomColors.PURPLE_DARK)),
+                ),
+              ),
+              ListView(
+                children: [
+                  BackTopTitle(context, '', Colors.white, 'Parking Entry', ''),
+                  Column(
                     children: [
-                      Column(
-                        children: [
-                          Expanded(
-                            flex: 1,
-                            child: Container(
-                              width: widthParent,
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.only(
-                                      bottomLeft: Radius.circular(30),
-                                      bottomRight: Radius.circular(30)),
-                                  color: Color(CustomColors.PURPLE_DARK)
-                                      .withOpacity(0.7)),
-                            ),
-                          ),
-                          Expanded(
-                            flex: 3,
-                            child: ClipPath(
-                              clipper: LoginScreenClipper2(),
+                      isLoadingList
+                          ? Center(
                               child: Container(
-                                //height: double.infinity-2,
-                                width: MediaQuery.of(context).size.width,
                                 decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                  begin: Alignment.centerLeft,
-                                  end: Alignment.bottomCenter,
-                                  colors: [
-                                    Color(CustomColors.PURPLE_DARK).withOpacity(0.4),
-                                    Color(CustomColors.PURPLE_DARK).withOpacity(0.2)
-                                  ],
-                                )),
+                                    color: Colors.white,
+                                    border: Border.all(
+                                        color: Color(CustomColors.GREEN_BUTTON),
+                                        width: 2),
+                                    borderRadius: BorderRadius.circular(20)),
+                                height: 270,
+                                width: widthParent * 0.9,
+                                child: SizedBox(
+                                  child: Transform.scale(
+                                    scale: 0.2,
+                                    child: CircularProgressIndicator(
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                          Color(CustomColors.GREEN_BUTTON)),
+                                      strokeWidth: 25,
+                                    ),
+                                  ),
+                                ),
                               ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      ClipPath(
-                        clipper: LoginDoneClipper1(),
-                        child: Container(
-                          height: 150,
-                          width: MediaQuery.of(context).size.width,
-                          decoration:
-                              BoxDecoration(color: Color(CustomColors.PURPLE_DARK)),
-                        ),
-                      ),
-                      ListView(
-                        children: [
-                          BackTopTitle(context,'', Colors.white, 'Parking Entry', ''),
-                          Column(
-                            children: [
-                              isLoadingList
-                                  ? Center(
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                            color: Colors.white,
-                                            border: Border.all(
-                                                color:
-                                                    Color(CustomColors.GREEN_BUTTON),
-                                                width: 2),
-                                            borderRadius: BorderRadius.circular(20)),
-                                        height: 270,
-                                        width: widthParent * 0.9,
-                                        child: SizedBox(
-                                          child: Transform.scale(
-                                            scale: 0.2,
-                                            child: CircularProgressIndicator(
-                                              valueColor: AlwaysStoppedAnimation<
-                                                      Color>(
-                                                  Color(CustomColors.GREEN_BUTTON)),
-                                              strokeWidth: 25,
-                                            ),
-                                          ),
+                            )
+                          : Padding(
+                              padding: const EdgeInsets.all(10.0),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    border: Border.all(
+                                        color: Color(CustomColors.GREEN_BUTTON),
+                                        width: 2),
+                                    borderRadius: BorderRadius.circular(20)),
+                                child: isError
+                                    ? Center(
+                                        child: Container(
+                                          child: Text('Some Error Occured'),
                                         ),
-                                      ),
-                                    )
-                                  : Padding(
-                                      padding: const EdgeInsets.all(10.0),
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                            color: Colors.white,
-                                            border: Border.all(
-                                                color:
-                                                    Color(CustomColors.GREEN_BUTTON),
-                                                width: 2),
-                                            borderRadius: BorderRadius.circular(20)),
-                                        child: isError
-                                            ? Center(
-                                                child: Container(
-                                                  child: Text('Some Error Occured'),
-                                                ),
-                                              )
-                                            : Padding(
-                                                padding: const EdgeInsets.all(12.0),
-                                                child: Column(
+                                      )
+                                    : Padding(
+                                        padding: const EdgeInsets.all(12.0),
+                                        child: Column(
+                                          children: [
+                                            Container(
+                                              margin: EdgeInsets.only(top: 10),
+                                              decoration: BoxDecoration(
+                                                  border: Border.all(
+                                                      color: Color(CustomColors
+                                                          .GREEN_BUTTON),
+                                                      width: 2),
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          10)),
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.all(8.0),
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
                                                   children: [
-                                                    Container(
-                                                      margin:
-                                                          EdgeInsets.only(top: 10),
-                                                      decoration: BoxDecoration(
-                                                          border: Border.all(
-                                                              color: Color(
-                                                                  CustomColors
-                                                                      .GREEN_BUTTON),
-                                                              width: 2),
-                                                          borderRadius:
-                                                              BorderRadius.circular(
-                                                                  10)),
-                                                      child: Padding(
-                                                        padding:
-                                                            const EdgeInsets.all(8.0),
-                                                        child: Row(
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .spaceBetween,
-                                                          children: [
-                                                            Column(
-                                                              children: [
-                                                                Container(
-                                                                  child: Text(
-                                                                    'Parking Time',
-                                                                    style: TextStyle(
-                                                                        color: Color(
-                                                                            CustomColors
-                                                                                .PURPLE_DARK),
-                                                                        fontSize: 12,
-                                                                        fontWeight:
-                                                                            FontWeight
-                                                                                .w600),
-                                                                  ),
-                                                                ),
-                                                                Container(
-                                                                  child: Text(
-                                                                    entryVehicleList
-                                                                                .length >
-                                                                            0
-                                                                        ? entryVehicleList
-                                                                            .elementAt(
-                                                                                0)
-                                                                            .parkingDuration!
-                                                                        : "0 hr",
-                                                                    style: TextStyle(
-                                                                        color: Colors
-                                                                            .black,
-                                                                        fontSize: 10,
-                                                                        fontWeight:
-                                                                            FontWeight
-                                                                                .w600),
-                                                                  ),
-                                                                )
-                                                              ],
-                                                            ),
-                                                            Column(
-                                                              mainAxisAlignment:
-                                                                  MainAxisAlignment
-                                                                      .spaceBetween,
-                                                              children: [
-                                                                Container(
-                                                                  child: Text(
-                                                                    entryVehicleList
-                                                                                .length >
-                                                                            0
-                                                                        ? entryVehicleList
-                                                                            .elementAt(
-                                                                                0)
-                                                                            .vehicleNo!
-                                                                        : "XX XX XX XXXX",
-                                                                    style: TextStyle(
-                                                                        color: Colors
-                                                                            .black,
-                                                                        fontSize: 18,
-                                                                        fontWeight:
-                                                                            FontWeight
-                                                                                .w600),
-                                                                  ),
-                                                                ),
-                                                                Row(
-                                                                  mainAxisAlignment:
-                                                                      MainAxisAlignment
-                                                                          .spaceBetween,
-                                                                  children: [
-                                                                    Container(
-                                                                      child: Text(
-                                                                        entryVehicleList
-                                                                                    .length >
-                                                                                0
-                                                                            ? CommonUtil().maskNumber(entryVehicleList
-                                                                                .elementAt(
-                                                                                    0)
-                                                                                .customerNo!)
-                                                                            : "XXXXXXXXXX",
-                                                                        style: TextStyle(
-                                                                            fontSize:
-                                                                                10),
-                                                                      ),
-                                                                    ),
-                                                                    Container(
-                                                                      margin: EdgeInsets
-                                                                          .only(
-                                                                              left:
-                                                                                  20),
-                                                                      child: Text(
-                                                                        entryVehicleList
-                                                                                    .length >
-                                                                                0
-                                                                            ? '₹ ' +
-                                                                                entryVehicleList
-                                                                                    .elementAt(0)
-                                                                                    .parkingCharge! +
-                                                                                '/-'
-                                                                            : 'Paid Up : ₹ 0/-',
-                                                                        style: TextStyle(
-                                                                            fontSize:
-                                                                                12),
-                                                                      ),
-                                                                    )
-                                                                  ],
-                                                                )
-                                                              ],
-                                                            )
-                                                          ],
+                                                    Column(
+                                                      children: [
+                                                        Container(
+                                                          child: Text(
+                                                            'Parking Time',
+                                                            style: TextStyle(
+                                                                color: Color(
+                                                                    CustomColors
+                                                                        .PURPLE_DARK),
+                                                                fontSize: 12,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w600),
+                                                          ),
                                                         ),
-                                                      ),
+                                                        Container(
+                                                          child: Text(
+                                                            entryVehicleList
+                                                                        .length >
+                                                                    0
+                                                                ? entryVehicleList
+                                                                    .elementAt(
+                                                                        0)
+                                                                    .parkingDuration!
+                                                                : "0 hr",
+                                                            style: TextStyle(
+                                                                color: Colors
+                                                                    .black,
+                                                                fontSize: 10,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w600),
+                                                          ),
+                                                        )
+                                                      ],
                                                     ),
-                                                    Container(
-                                                      margin:
-                                                          EdgeInsets.only(top: 10),
-                                                      decoration: BoxDecoration(
-                                                          border: Border.all(
-                                                              color: Color(
-                                                                  CustomColors
-                                                                      .GREEN_BUTTON),
-                                                              width: 2),
-                                                          borderRadius:
-                                                              BorderRadius.circular(
-                                                                  10)),
-                                                      child: Padding(
-                                                        padding:
-                                                            const EdgeInsets.all(8.0),
-                                                        child: Row(
+                                                    Column(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceBetween,
+                                                      children: [
+                                                        Container(
+                                                          child: Text(
+                                                            entryVehicleList
+                                                                        .length >
+                                                                    0
+                                                                ? entryVehicleList
+                                                                    .elementAt(
+                                                                        0)
+                                                                    .vehicleNo!
+                                                                : "XX XX XX XXXX",
+                                                            style: TextStyle(
+                                                                color: Colors
+                                                                    .black,
+                                                                fontSize: 18,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w600),
+                                                          ),
+                                                        ),
+                                                        Row(
                                                           mainAxisAlignment:
                                                               MainAxisAlignment
                                                                   .spaceBetween,
                                                           children: [
-                                                            Column(
-                                                              children: [
-                                                                Container(
-                                                                  child: Text(
-                                                                    'Parking Time',
-                                                                    style: TextStyle(
-                                                                        color: Color(
-                                                                            CustomColors
-                                                                                .PURPLE_DARK),
-                                                                        fontSize: 12,
-                                                                        fontWeight:
-                                                                            FontWeight
-                                                                                .w600),
-                                                                  ),
-                                                                ),
-                                                                Container(
-                                                                  child: Text(
-                                                                    entryVehicleList
-                                                                                .length >
-                                                                            1
-                                                                        ? entryVehicleList
-                                                                            .elementAt(
-                                                                                1)
-                                                                            .parkingDuration!
-                                                                        : "0 hr",
-                                                                    style: TextStyle(
-                                                                        color: Colors
-                                                                            .black,
-                                                                        fontSize: 10,
-                                                                        fontWeight:
-                                                                            FontWeight
-                                                                                .w600),
-                                                                  ),
-                                                                )
-                                                              ],
+                                                            Container(
+                                                              child: Text(
+                                                                entryVehicleList
+                                                                            .length >
+                                                                        0
+                                                                    ? CommonUtil().maskNumber(entryVehicleList
+                                                                        .elementAt(
+                                                                            0)
+                                                                        .customerNo!)
+                                                                    : "XXXXXXXXXX",
+                                                                style: TextStyle(
+                                                                    fontSize:
+                                                                        10),
+                                                              ),
                                                             ),
-                                                            Column(
-                                                              mainAxisAlignment:
-                                                                  MainAxisAlignment
-                                                                      .spaceBetween,
-                                                              children: [
-                                                                Container(
-                                                                  child: Text(
-                                                                    entryVehicleList
-                                                                                .length >
-                                                                            1
-                                                                        ? entryVehicleList
-                                                                            .elementAt(
-                                                                                1)
-                                                                            .vehicleNo!
-                                                                        : "XX XX XX XXXX",
-                                                                    style: TextStyle(
-                                                                        color: Colors
-                                                                            .black,
-                                                                        fontSize: 18,
-                                                                        fontWeight:
-                                                                            FontWeight
-                                                                                .w600),
-                                                                  ),
-                                                                ),
-                                                                Row(
-                                                                  mainAxisAlignment:
-                                                                      MainAxisAlignment
-                                                                          .spaceBetween,
-                                                                  children: [
-                                                                    Container(
-                                                                      child: Text(
+                                                            Container(
+                                                              margin: EdgeInsets
+                                                                  .only(
+                                                                      left: 20),
+                                                              child: Text(
+                                                                entryVehicleList
+                                                                            .length >
+                                                                        0
+                                                                    ? '₹ ' +
                                                                         entryVehicleList
-                                                                                    .length >
-                                                                                1
-                                                                            ? CommonUtil().maskNumber(entryVehicleList
-                                                                                .elementAt(
-                                                                                    1)
-                                                                                .customerNo!)
-                                                                            : "XXXXXXXXXX",
-                                                                        style: TextStyle(
-                                                                            fontSize:
-                                                                                10),
-                                                                      ),
-                                                                    ),
-                                                                    Container(
-                                                                      margin: EdgeInsets
-                                                                          .only(
-                                                                              left:
-                                                                                  20),
-                                                                      child: Text(
-                                                                        entryVehicleList
-                                                                                    .length >
-                                                                                1
-                                                                            ? '₹ ' +
-                                                                                entryVehicleList
-                                                                                    .elementAt(1)
-                                                                                    .parkingCharge! +
-                                                                                '/-'
-                                                                            : 'Paid Up : ₹ 0/-',
-                                                                        style: TextStyle(
-                                                                            fontSize:
-                                                                                12),
-                                                                      ),
-                                                                    )
-                                                                  ],
-                                                                )
-                                                              ],
+                                                                            .elementAt(0)
+                                                                            .parkingCharge! +
+                                                                        '/-'
+                                                                    : 'Paid Up : ₹ 0/-',
+                                                                style: TextStyle(
+                                                                    fontSize:
+                                                                        12),
+                                                              ),
                                                             )
                                                           ],
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    Container(
-                                                      margin:
-                                                          EdgeInsets.only(top: 10),
-                                                      decoration: BoxDecoration(
-                                                          border: Border.all(
-                                                              color: Color(
-                                                                  CustomColors
-                                                                      .GREEN_BUTTON),
-                                                              width: 2),
-                                                          borderRadius:
-                                                              BorderRadius.circular(
-                                                                  10)),
-                                                      child: Padding(
-                                                        padding:
-                                                            const EdgeInsets.all(8.0),
-                                                        child: Row(
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .spaceBetween,
-                                                          children: [
-                                                            Column(
-                                                              children: [
-                                                                Container(
-                                                                  child: Text(
-                                                                    'Parking Time',
-                                                                    style: TextStyle(
-                                                                        color: Color(
-                                                                            CustomColors
-                                                                                .PURPLE_DARK),
-                                                                        fontSize: 12,
-                                                                        fontWeight:
-                                                                            FontWeight
-                                                                                .w600),
-                                                                  ),
-                                                                ),
-                                                                Container(
-                                                                  child: Text(
-                                                                    entryVehicleList
-                                                                                .length >
-                                                                            2
-                                                                        ? entryVehicleList
-                                                                            .elementAt(
-                                                                                2)
-                                                                            .parkingDuration!
-                                                                        : "0 hr",
-                                                                    style: TextStyle(
-                                                                        color: Colors
-                                                                            .black,
-                                                                        fontSize: 10,
-                                                                        fontWeight:
-                                                                            FontWeight
-                                                                                .w600),
-                                                                  ),
-                                                                )
-                                                              ],
-                                                            ),
-                                                            Column(
-                                                              mainAxisAlignment:
-                                                                  MainAxisAlignment
-                                                                      .spaceBetween,
-                                                              children: [
-                                                                Container(
-                                                                  child: Text(
-                                                                    entryVehicleList
-                                                                                .length >
-                                                                            2
-                                                                        ? entryVehicleList
-                                                                            .elementAt(
-                                                                                2)
-                                                                            .vehicleNo!
-                                                                        : "XX XX XX XXXX",
-                                                                    style: TextStyle(
-                                                                        color: Colors
-                                                                            .black,
-                                                                        fontSize: 18,
-                                                                        fontWeight:
-                                                                            FontWeight
-                                                                                .w600),
-                                                                  ),
-                                                                ),
-                                                                Row(
-                                                                  mainAxisAlignment:
-                                                                      MainAxisAlignment
-                                                                          .spaceBetween,
-                                                                  children: [
-                                                                    Container(
-                                                                      child: Text(
-                                                                        entryVehicleList
-                                                                                    .length >
-                                                                                2
-                                                                            ? CommonUtil().maskNumber(entryVehicleList
-                                                                                .elementAt(
-                                                                                    2)
-                                                                                .customerNo!)
-                                                                            : "XXXXXXXXXX",
-                                                                        style: TextStyle(
-                                                                            fontSize:
-                                                                                10),
-                                                                      ),
-                                                                    ),
-                                                                    Container(
-                                                                      margin: EdgeInsets
-                                                                          .only(
-                                                                              left:
-                                                                                  20),
-                                                                      child: Text(
-                                                                        entryVehicleList
-                                                                                    .length >
-                                                                                2
-                                                                            ? '₹ ' +
-                                                                                entryVehicleList
-                                                                                    .elementAt(2)
-                                                                                    .parkingCharge! +
-                                                                                '/-'
-                                                                            : 'Paid Up : ₹ 0/-',
-                                                                        style: TextStyle(
-                                                                            fontSize:
-                                                                                12),
-                                                                      ),
-                                                                    )
-                                                                  ],
-                                                                )
-                                                              ],
-                                                            )
-                                                          ],
-                                                        ),
-                                                      ),
+                                                        )
+                                                      ],
                                                     )
                                                   ],
                                                 ),
                                               ),
+                                            ),
+                                            Container(
+                                              margin: EdgeInsets.only(top: 10),
+                                              decoration: BoxDecoration(
+                                                  border: Border.all(
+                                                      color: Color(CustomColors
+                                                          .GREEN_BUTTON),
+                                                      width: 2),
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          10)),
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.all(8.0),
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
+                                                  children: [
+                                                    Column(
+                                                      children: [
+                                                        Container(
+                                                          child: Text(
+                                                            'Parking Time',
+                                                            style: TextStyle(
+                                                                color: Color(
+                                                                    CustomColors
+                                                                        .PURPLE_DARK),
+                                                                fontSize: 12,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w600),
+                                                          ),
+                                                        ),
+                                                        Container(
+                                                          child: Text(
+                                                            entryVehicleList
+                                                                        .length >
+                                                                    1
+                                                                ? entryVehicleList
+                                                                    .elementAt(
+                                                                        1)
+                                                                    .parkingDuration!
+                                                                : "0 hr",
+                                                            style: TextStyle(
+                                                                color: Colors
+                                                                    .black,
+                                                                fontSize: 10,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w600),
+                                                          ),
+                                                        )
+                                                      ],
+                                                    ),
+                                                    Column(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceBetween,
+                                                      children: [
+                                                        Container(
+                                                          child: Text(
+                                                            entryVehicleList
+                                                                        .length >
+                                                                    1
+                                                                ? entryVehicleList
+                                                                    .elementAt(
+                                                                        1)
+                                                                    .vehicleNo!
+                                                                : "XX XX XX XXXX",
+                                                            style: TextStyle(
+                                                                color: Colors
+                                                                    .black,
+                                                                fontSize: 18,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w600),
+                                                          ),
+                                                        ),
+                                                        Row(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .spaceBetween,
+                                                          children: [
+                                                            Container(
+                                                              child: Text(
+                                                                entryVehicleList
+                                                                            .length >
+                                                                        1
+                                                                    ? CommonUtil().maskNumber(entryVehicleList
+                                                                        .elementAt(
+                                                                            1)
+                                                                        .customerNo!)
+                                                                    : "XXXXXXXXXX",
+                                                                style: TextStyle(
+                                                                    fontSize:
+                                                                        10),
+                                                              ),
+                                                            ),
+                                                            Container(
+                                                              margin: EdgeInsets
+                                                                  .only(
+                                                                      left: 20),
+                                                              child: Text(
+                                                                entryVehicleList
+                                                                            .length >
+                                                                        1
+                                                                    ? '₹ ' +
+                                                                        entryVehicleList
+                                                                            .elementAt(1)
+                                                                            .parkingCharge! +
+                                                                        '/-'
+                                                                    : 'Paid Up : ₹ 0/-',
+                                                                style: TextStyle(
+                                                                    fontSize:
+                                                                        12),
+                                                              ),
+                                                            )
+                                                          ],
+                                                        )
+                                                      ],
+                                                    )
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                            Container(
+                                              margin: EdgeInsets.only(top: 10),
+                                              decoration: BoxDecoration(
+                                                  border: Border.all(
+                                                      color: Color(CustomColors
+                                                          .GREEN_BUTTON),
+                                                      width: 2),
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          10)),
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.all(8.0),
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
+                                                  children: [
+                                                    Column(
+                                                      children: [
+                                                        Container(
+                                                          child: Text(
+                                                            'Parking Time',
+                                                            style: TextStyle(
+                                                                color: Color(
+                                                                    CustomColors
+                                                                        .PURPLE_DARK),
+                                                                fontSize: 12,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w600),
+                                                          ),
+                                                        ),
+                                                        Container(
+                                                          child: Text(
+                                                            entryVehicleList
+                                                                        .length >
+                                                                    2
+                                                                ? entryVehicleList
+                                                                    .elementAt(
+                                                                        2)
+                                                                    .parkingDuration!
+                                                                : "0 hr",
+                                                            style: TextStyle(
+                                                                color: Colors
+                                                                    .black,
+                                                                fontSize: 10,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w600),
+                                                          ),
+                                                        )
+                                                      ],
+                                                    ),
+                                                    Column(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceBetween,
+                                                      children: [
+                                                        Container(
+                                                          child: Text(
+                                                            entryVehicleList
+                                                                        .length >
+                                                                    2
+                                                                ? entryVehicleList
+                                                                    .elementAt(
+                                                                        2)
+                                                                    .vehicleNo!
+                                                                : "XX XX XX XXXX",
+                                                            style: TextStyle(
+                                                                color: Colors
+                                                                    .black,
+                                                                fontSize: 18,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w600),
+                                                          ),
+                                                        ),
+                                                        Row(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .spaceBetween,
+                                                          children: [
+                                                            Container(
+                                                              child: Text(
+                                                                entryVehicleList
+                                                                            .length >
+                                                                        2
+                                                                    ? CommonUtil().maskNumber(entryVehicleList
+                                                                        .elementAt(
+                                                                            2)
+                                                                        .customerNo!)
+                                                                    : "XXXXXXXXXX",
+                                                                style: TextStyle(
+                                                                    fontSize:
+                                                                        10),
+                                                              ),
+                                                            ),
+                                                            Container(
+                                                              margin: EdgeInsets
+                                                                  .only(
+                                                                      left: 20),
+                                                              child: Text(
+                                                                entryVehicleList
+                                                                            .length >
+                                                                        2
+                                                                    ? '₹ ' +
+                                                                        entryVehicleList
+                                                                            .elementAt(2)
+                                                                            .parkingCharge! +
+                                                                        '/-'
+                                                                    : 'Paid Up : ₹ 0/-',
+                                                                style: TextStyle(
+                                                                    fontSize:
+                                                                        12),
+                                                              ),
+                                                            )
+                                                          ],
+                                                        )
+                                                      ],
+                                                    )
+                                                  ],
+                                                ),
+                                              ),
+                                            )
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                              Container(
-                                alignment: Alignment.topLeft,
-                                margin: EdgeInsets.only(top: 50, left: 20),
-                                child: Text(
-                                  'Choose Scan Method',
-                                  style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w600),
-                                ),
                               ),
-                              GestureDetector(
-                                onTap: () {
-                                  widget.controller.jumpToPage(1);
-                                },
-                                child: Container(
-                                  margin: EdgeInsets.only(bottom: 20),
+                            ),
+                      Container(
+                        alignment: Alignment.topLeft,
+                        margin: EdgeInsets.only(top: 50, left: 20),
+                        child: Text(
+                          'Choose Scan Method',
+                          style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          widget.controller.jumpToPage(1);
+                        },
+                        child: Container(
+                          margin: EdgeInsets.only(bottom: 20),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              Container(
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(
+                                        color: Color(CustomColors.PURPLE_DARK),
+                                        width: 2)),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
                                   child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                     children: [
                                       Container(
-                                        decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(10),
-                                            border: Border.all(
-                                                color:
-                                                    Color(CustomColors.PURPLE_DARK),
-                                                width: 2)),
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: Row(
-                                            children: [
-                                              Container(
-                                                child: Image(
-                                                  width: 30,
-                                                  height: 30,
-                                                  fit: BoxFit.contain,
-                                                  image: AssetImage(
-                                                      'assets/images/scan_qr.png'),
-                                                ),
-                                              ),
-                                              Container(
-                                                  margin: EdgeInsets.only(left: 20),
-                                                  child: Text('Scan\nCustomer QR')),
-                                            ],
-                                          ),
+                                        child: Image(
+                                          width: 30,
+                                          height: 30,
+                                          fit: BoxFit.contain,
+                                          image: AssetImage(
+                                              'assets/images/scan_qr.png'),
                                         ),
                                       ),
                                       Container(
-                                        decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(10),
-                                            border: Border.all(
-                                                color:
-                                                    Color(CustomColors.PURPLE_DARK),
-                                                width: 2)),
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: Row(
-                                            children: [
-                                              Container(
-                                                child: Image(
-                                                  width: 30,
-                                                  height: 30,
-                                                  fit: BoxFit.contain,
-                                                  image: AssetImage(
-                                                      'assets/images/scan_number_plate.png'),
-                                                ),
-                                              ),
-                                              Container(
-                                                  margin: EdgeInsets.only(left: 20),
-                                                  child: Text('Scan\nNumber Plate')),
-                                            ],
-                                          ),
-                                        ),
-                                      )
+                                          margin: EdgeInsets.only(left: 20),
+                                          child: Text('Scan\nCustomer QR')),
                                     ],
                                   ),
                                 ),
                               ),
                               Container(
-                                alignment: Alignment.topLeft,
-                                margin: EdgeInsets.only(left: 20),
-                                child: Text(
-                                  'Manual',
-                                  style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w600),
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(
+                                        color: Color(CustomColors.PURPLE_DARK),
+                                        width: 2)),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        child: Image(
+                                          width: 30,
+                                          height: 30,
+                                          fit: BoxFit.contain,
+                                          image: AssetImage(
+                                              'assets/images/scan_number_plate.png'),
+                                        ),
+                                      ),
+                                      Container(
+                                          margin: EdgeInsets.only(left: 20),
+                                          child: Text('Scan\nNumber Plate')),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.only(
-                                    left: 20, right: 20, top: 20),
-                                child: Container(
-                                    height: 70,
-                                    alignment: Alignment.center,
-                                    decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(10),
-                                        border: Border.all(
-                                            color: Color(CustomColors.PURPLE_DARK),
-                                            width: 2)),
-                                    child: Padding(
-                                      padding: EdgeInsets.all(10),
-                                      child: Row(
-                                        children: [
-                                          Container(
-                                            margin: EdgeInsets.only(right: 20),
-                                            child: Image(
-                                              height: 15,
-                                              width: 15,
-                                              fit: BoxFit.contain,
-                                              image: AssetImage(
-                                                  'assets/images/approved_fragment3.png'),
-                                            ),
-                                          ),
-                                          Expanded(
-                                            child: Container(
-                                              margin: EdgeInsets.only(bottom: 7),
-                                              child: TextField(
-                                                keyboardType: TextInputType.text,
-                                                controller:
-                                                vehicleNumberInputController,
-                                                inputFormatters: [
-                                                  UpperCaseTextFormatter()
-                                                ],
-                                                maxLength: 10,
-                                                style: TextStyle(fontSize: 22),
-                                                onChanged: (text) {
-                                                  if (text.length == 10) {
-                                                    FocusScope.of(context).unfocus();
-                                                    fetchMobileNo(vehicleNumberInputController.text);
-                                                  }
-                                                },
-                                                decoration: InputDecoration(
-                                                  border: InputBorder.none,
-                                                  isCollapsed: true,
-                                                  counterText: '',
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                          isFetchingMNo
-                                              ? Container(
-                                            width: 30,
-                                            height: 30,
-                                            child: CircularProgressIndicator(
-                                              valueColor:
-                                              AlwaysStoppedAnimation<Color>(
-                                                  Color(CustomColors
-                                                      .GREEN_BUTTON)),
-                                              strokeWidth: 4,
-                                            ),
-                                          )
-                                              : Container(),
-
-                                        ],
-                                      ),
-                                    )),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.only(
-                                    left: 20, right: 20, top: 10),
-                                child: Container(
-                                    height: 70,
-                                    alignment: Alignment.center,
-                                    decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(10),
-                                        border: Border.all(
-                                            color: Color(CustomColors.PURPLE_DARK),
-                                            width: 2)),
-                                    child: Padding(
-                                      padding: EdgeInsets.all(10),
-                                      child: Row(
-                                        children: [
-                                          Text(
-                                            '+91 ',
-                                            style: TextStyle(fontSize: 22),
-                                          ),
-                                          Expanded(
-                                            child: Container(
-                                              margin: EdgeInsets.only(bottom: 7),
-                                              child: TextField(
-                                                keyboardType: TextInputType.number,
-                                                controller:
-                                                    mobileNumberInputController,
-                                                maxLength: 10,
-                                                style: TextStyle(fontSize: 22),
-                                                onChanged: (text) {
-                                                  if (text.length == 10) {
-                                                    FocusScope.of(context).unfocus();
-                                                  }
-                                                },
-                                                decoration: InputDecoration(
-                                                  border: InputBorder.none,
-                                                  isCollapsed: true,
-                                                  counterText: '',
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    )),
-                              ),
-                              isLoading
-                                  ? Container(
-                                      margin: EdgeInsets.only(top: 50),
-                                      width: 30,
-                                      height: 30,
-                                      child: CircularProgressIndicator(
-                                        valueColor: AlwaysStoppedAnimation<Color>(
-                                            Color(CustomColors.GREEN_BUTTON)),
-                                        strokeWidth: 4,
-                                      ),
-                                    )
-                                  : Container(
-                                      margin: EdgeInsets.only(top: 20),
-                                      child: ElevatedButton(
-                                        onPressed: () async {
-                                          final SharedPreferences sharedPreferences =
-                                              await SharedPreferences.getInstance();
-                                          isConfirmedTicketFromQR =
-                                              sharedPreferences.getBool(
-                                                  Constants.IS_TICKET_CONFIRMED)!;
-                                          if (isConfirmedTicketFromQR) {
-                                            setState(() {
-                                              sharedPreferences.setBool(
-                                                  Constants.IS_TICKET_CONFIRMED,
-                                                  false);
-                                              mobileNumberInputController.setText("");
-                                              vehicleNumberInputController
-                                                  .setText("");
-                                            });
-                                          } else {
-                                            createCustomer(
-                                                vehicleNumberInputController.text,
-                                                mobileNo!);
-                                          }
-                                        },
-                                        child: Padding(
-                                          padding: const EdgeInsets.only(
-                                              top: 10,
-                                              bottom: 10,
-                                              left: 50,
-                                              right: 50),
-                                          child: Container(
-                                            child: Text(
-                                              'Next',
-                                              style: TextStyle(
-                                                  color: Colors.white, fontSize: 18),
-                                            ),
-                                          ),
-                                        ),
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor:
-                                              Color(CustomColors.GREEN_BUTTON),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(
-                                                20.0), // Set border radius
-                                          ),
-                                        ),
-                                      ),
-                                    )
+                              )
                             ],
                           ),
-                        ],
+                        ),
                       ),
-                      (isConfirmedTicket || isConfirmedTicketFromQR)
-                          ? showSuccessAlert(widthParent)
-                          : Container()
+                      Container(
+                        alignment: Alignment.topLeft,
+                        margin: EdgeInsets.only(left: 20),
+                        child: Text(
+                          'Manual',
+                          style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                      Padding(
+                        padding:
+                            const EdgeInsets.only(left: 20, right: 20, top: 20),
+                        child: Container(
+                            height: 70,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(
+                                    color: Color(CustomColors.PURPLE_DARK),
+                                    width: 2)),
+                            child: Padding(
+                              padding: EdgeInsets.all(10),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    margin: EdgeInsets.only(right: 20),
+                                    child: Image(
+                                      height: 15,
+                                      width: 15,
+                                      fit: BoxFit.contain,
+                                      image: AssetImage(
+                                          'assets/images/approved_fragment3.png'),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: Container(
+                                      margin: EdgeInsets.only(bottom: 7),
+                                      child: TextField(
+                                        keyboardType: TextInputType.text,
+                                        controller:
+                                            vehicleNumberInputController,
+                                        inputFormatters: [
+                                          UpperCaseTextFormatter()
+                                        ],
+                                        maxLength: 10,
+                                        style: TextStyle(fontSize: 22),
+                                        onChanged: (text) {
+                                          if (text.length == 10) {
+                                                 FocusScope.of(context).unfocus();
+                                                 fetchMobileNo(vehicleNumberInputController.text);
+                                           } else {
+                                                // Allow manual entry by clearing `mobileNo`
+                                                 mobileNo = ""; 
+                                           }
+                                        },
+                                        decoration: InputDecoration(
+                                          border: InputBorder.none,
+                                          isCollapsed: true,
+                                          counterText: '',
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  isFetchingMNo
+                                      ? Container(
+                                          width: 30,
+                                          height: 30,
+                                          child: CircularProgressIndicator(
+                                            valueColor:
+                                                AlwaysStoppedAnimation<Color>(
+                                                    Color(CustomColors
+                                                        .GREEN_BUTTON)),
+                                            strokeWidth: 4,
+                                          ),
+                                        )
+                                      : Container(),
+                                ],
+                              ),
+                            )),
+                      ),
+                      Padding(
+                        padding:
+                            const EdgeInsets.only(left: 20, right: 20, top: 10),
+                        child: Container(
+                            height: 70,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(
+                                    color: Color(CustomColors.PURPLE_DARK),
+                                    width: 2)),
+                            child: Padding(
+                              padding: EdgeInsets.all(10),
+                              child: Row(
+                                children: [
+                                  Text(
+                                    '+91 ',
+                                    style: TextStyle(fontSize: 22),
+                                  ),
+                                  Expanded(
+                                    child: Container(
+                                      margin: EdgeInsets.only(bottom: 7),
+                                      child: TextField(
+                                        keyboardType: TextInputType.number,
+                                        controller: mobileNumberInputController,
+                                        maxLength: 10,
+                                        style: TextStyle(fontSize: 22),
+                                        onChanged: (text) {
+                                          if (text.length == 10) {
+                                            FocusScope.of(context).unfocus();
+                                          }
+                                        },
+                                        decoration: InputDecoration(
+                                          border: InputBorder.none,
+                                          isCollapsed: true,
+                                          counterText: '',
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )),
+                      ),
+                      isLoading
+                          ? Container(
+                              margin: EdgeInsets.only(top: 50),
+                              width: 30,
+                              height: 30,
+                              child: CircularProgressIndicator(
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                    Color(CustomColors.GREEN_BUTTON)),
+                                strokeWidth: 4,
+                              ),
+                            )
+                          : Container(
+                              margin: EdgeInsets.only(top: 20),
+                              child: ElevatedButton(
+                                onPressed: () async {
+                                  final SharedPreferences sharedPreferences =
+                                      await SharedPreferences.getInstance();
+                                  isConfirmedTicketFromQR = sharedPreferences
+                                      .getBool(Constants.IS_TICKET_CONFIRMED)!;
+                                  if (isConfirmedTicketFromQR) {
+                                    setState(() {
+                                      sharedPreferences.setBool(
+                                          Constants.IS_TICKET_CONFIRMED, false);
+                                      mobileNumberInputController.setText("");
+                                      vehicleNumberInputController.setText("");
+                                    });
+                                  } else {
+                                    createCustomer(
+                                        vehicleNumberInputController.text,
+                                        mobileNo!);
+                                  }
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.only(
+                                      top: 10, bottom: 10, left: 50, right: 50),
+                                  child: Container(
+                                    child: Text(
+                                      'Next',
+                                      style: TextStyle(
+                                          color: Colors.white, fontSize: 18),
+                                    ),
+                                  ),
+                                ),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor:
+                                      Color(CustomColors.GREEN_BUTTON),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(
+                                        20.0), // Set border radius
+                                  ),
+                                ),
+                              ),
+                            )
                     ],
                   ),
-                ),
+                ],
               ),
-        ));
+              (isConfirmedTicket || isConfirmedTicketFromQR)
+                  ? showSuccessAlert(widthParent)
+                  : Container()
+            ],
+          ),
+        ),
+      ),
+    ));
   }
 
   void createCustomer(String vehicleNumber, String mobileNumber) async {
@@ -859,15 +842,21 @@ class _ApprovedFragmentState extends State<ApprovedFragment> {
       dio.interceptors.add(AuthInterceptor(accessToken!));
       try {
         final ApiService apiService = ApiService(dio);
-
+        
+         // Prioritize unmasked `mobileNo` if available; fallback to the text in `mobileNumberInputController`
+      final String enteredMobileNo = unmaskedMobileNo.isNotEmpty 
+    ? unmaskedMobileNo 
+    : mobileNumberInputController.text;
+      
         final CreateCustomerResponse response = await apiService.createCustomer(
-            CreateCustomerRequest('EMPLOYEE_APP', mobileNumber, vehicleNumber, employeeID!));
-        if(response.parkingTicketID == null){
+            CreateCustomerRequest(
+                'EMPLOYEE_APP', enteredMobileNo, vehicleNumber, employeeID!));
+        if (response.parkingTicketID == null) {
           CommonUtil().showToast("Vehicle Already Parked");
           setState(() {
             isLoading = false;
           });
-          return ;
+          return;
         }
         print('userid-----' + response.parkingTicketID!);
         if (response.vehicleNo != null) {
@@ -876,12 +865,28 @@ class _ApprovedFragmentState extends State<ApprovedFragment> {
           sharedPreferences.setString(Constants.VEHICLE_ID, response.vehicleID);
           sharedPreferences.setString(
               Constants.VEHICLE_NUMBER, response.vehicleNo);
+          // Set initial charges and payment mode in SharedPreferences
+        sharedPreferences.setString(Constants.INITIAL_CHARGES, response.initialCharge);
+        sharedPreferences.setString(Constants.PAYMENT_MODE, response.paymentMode);
+
+        // Set the variables for display
+        setState(() {
+          initialCharges = response.initialCharge;
+          paymentMode = response.paymentMode;
+        });
+        
+        print('Initial Charges createCustomer: ${response.initialCharge}');
+        print('Payment Mode createCustome: ${response.paymentMode}');
         }
+        
         setState(() {
           isLoading = false;
           parkingTicketID = response.parkingTicketID!;
           isConfirmedTicket = true;
         });
+        
+     //  populateList();
+
       } on DioException catch (e) {
         if (e.response?.statusCode == 400) {
           String errorMessage = e.response?.data['message'];
@@ -910,8 +915,11 @@ class _ApprovedFragmentState extends State<ApprovedFragment> {
     setState(() {
       vehicleNumberInputController
           .setText(sharedPreferences.getString(Constants.VEHICLE_NUMBER)!);
-      mobileNumberInputController
-          .setText(sharedPreferences.getString(Constants.MOBILE_NUMBER)!);
+      
+       // Retrieve unmasked number and mask it for display
+        unmaskedMobileNo = sharedPreferences.getString(Constants.MOBILE_NUMBER)!;
+        mobileNumberInputController.setText(CommonUtil().maskNumber(unmaskedMobileNo).substring(3));
+        
       sharedPreferences.setString(Constants.VEHICLE_NUMBER, "");
       sharedPreferences.setString(Constants.MOBILE_NUMBER, "");
     });
@@ -1217,8 +1225,12 @@ class _ApprovedFragmentState extends State<ApprovedFragment> {
       String? accessToken = sharedPreferences.getString(Constants.ACCESS_TOKEN);
       String? employeeID = sharedPreferences.getString(Constants.EMPLOYEE_ID);
 
-      initialCharges = sharedPreferences.getInt(Constants.INITIAL_CHARGES).toString();
-      paymentMode = sharedPreferences.getString(Constants.PAYMENT_MODE) ?? "Cash";
+      initialCharges =
+          sharedPreferences.getInt(Constants.INITIAL_CHARGES).toString();
+      paymentMode =
+          sharedPreferences.getString(Constants.PAYMENT_MODE)?? "Cash";
+      print('Initial Charges (from populateList): $initialCharges');
+      print('Payment Mode (from populateList): $paymentMode');
 
       try {
         final dio = Dio(BaseOptions(contentType: "application/json"));
@@ -1262,13 +1274,12 @@ class _ApprovedFragmentState extends State<ApprovedFragment> {
   }
 
   void fetchMobileNo(String vehicleNumber) async {
-    print('Inside FEtch');
+    print('Inside Fetch');
     setState(() {
       isFetchingMNo = true;
     });
     try {
-      SharedPreferences sharedPreferences =
-          await SharedPreferences.getInstance();
+      SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
       String? accessToken = sharedPreferences.getString(Constants.ACCESS_TOKEN);
 
       final dio = Dio(BaseOptions(contentType: "application/json"));
@@ -1278,46 +1289,33 @@ class _ApprovedFragmentState extends State<ApprovedFragment> {
 
       try {
         final response = await apiService.getVehicleDetails(vehicleNumber);
-      try{
-        mobileNumberInputController.setText(CommonUtil().maskNumber(response.mobileNo!).substring(3));
-
-          mobileNo = response.mobileNo!;
-          setState(() {
-            mobileNo = response.mobileNo!;
-            isFetchingMNo = false;
-          });
-        }catch(e){
-
-          CommonUtil().showToast("Vehicle not present in the system");
-          print(e);
-          setState(() {
-            isFetchingMNo = false;
-            mobileNumberInputController.clear();
-          });
-        }
+        if (response.mobileNo != null) {
+          // Store the unmasked mobile number for API usage
+          unmaskedMobileNo = response.mobileNo!;
           
-        
-        
-      } on DioException catch (e) {
-        if (e.response?.statusCode == 400) {
-          String errorMessage = e.response?.data['message'];
-          print("errorMessage---" + errorMessage.toString());
-          CommonUtil().showToast(errorMessage);
+          // Display only the masked version in the TextField
+          mobileNumberInputController.text = CommonUtil().maskNumber(unmaskedMobileNo).substring(3);
         } else {
-          CommonUtil().showToast(Constants.GENERIC_ERROR_MESSAGE);
+          // Clear the mobile number to allow manual entry
+          mobileNumberInputController.clear();
+          unmaskedMobileNo = "";  // Reset if not found
+          CommonUtil().showToast("Vehicle not present in the system. Please enter manually.");
         }
-        print('error123' + e.toString());
-        setState(() {
-          isFetchingMNo = false;
-        });
-
+      } catch (e) {
+        // Display a message for the manual entry case
+        CommonUtil().showToast("Vehicle not present in the system. Please enter manually.");
+        mobileNumberInputController.clear(); // Clear field to allow typing
+        unmaskedMobileNo = ""; // Reset in case of error
       }
     } catch (e) {
-      print('inside cafch');
+      print('Inside catch block');
+      CommonUtil().showToast(Constants.GENERIC_ERROR_MESSAGE);
+    } finally {
       setState(() {
         isFetchingMNo = false;
       });
-      CommonUtil().showToast(Constants.GENERIC_ERROR_MESSAGE);
     }
   }
+
+
 }

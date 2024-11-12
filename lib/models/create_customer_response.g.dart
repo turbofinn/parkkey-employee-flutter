@@ -13,6 +13,8 @@ CreateCustomerResponse _$CreateCustomerResponseFromJson(
       vehicleID: json['vehicleID'] as String,
       vehicleNo: json['vehicleNo'] as String,
       parkingTicketID: json['parkingTicketID'] as String?,
+      initialCharge: json['initialCharge'] as String,
+      paymentMode: json['paymentMode'] as String,
     );
 
 Map<String, dynamic> _$CreateCustomerResponseToJson(
@@ -22,4 +24,6 @@ Map<String, dynamic> _$CreateCustomerResponseToJson(
       'vehicleID': instance.vehicleID,
       'vehicleNo': instance.vehicleNo,
       'parkingTicketID': instance.parkingTicketID,
+      'initialCharge': instance.initialCharge,
+      'paymentMode': instance.paymentMode,
     };
