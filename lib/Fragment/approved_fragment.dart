@@ -26,8 +26,9 @@ import '../utils/common_util.dart';
 
 class ApprovedFragment extends StatefulWidget {
   final PageController controller;
+  final Function(int) setScanIndex;
 
-  const ApprovedFragment({required this.controller, super.key});
+  const ApprovedFragment({required this.controller, required this.setScanIndex, super.key});
 
   @override
   State<ApprovedFragment> createState() => _ApprovedFragmentState();
@@ -576,16 +577,17 @@ class _ApprovedFragmentState extends State<ApprovedFragment> {
                                       fontWeight: FontWeight.w600),
                                 ),
                               ),
-                              GestureDetector(
-                                onTap: () {
-                                  widget.controller.jumpToPage(1);
-                                },
-                                child: Container(
-                                  margin: EdgeInsets.only(bottom: 20),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                    children: [
-                                      Container(
+                              Container(
+                                margin: EdgeInsets.only(bottom: 20),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    GestureDetector(
+                                      onTap: () {
+                                        widget.setScanIndex(0);
+                                        widget.controller.jumpToPage(1);
+                                      },
+                                      child: Container(
                                         decoration: BoxDecoration(
                                             borderRadius: BorderRadius.circular(10),
                                             border: Border.all(
@@ -612,7 +614,13 @@ class _ApprovedFragmentState extends State<ApprovedFragment> {
                                           ),
                                         ),
                                       ),
-                                      Container(
+                                    ),
+                                    GestureDetector(
+                                      onTap: (){
+                                        widget.setScanIndex(1);
+                                        widget.controller.jumpToPage(1);
+                                      },
+                                      child: Container(
                                         decoration: BoxDecoration(
                                             borderRadius: BorderRadius.circular(10),
                                             border: Border.all(
@@ -638,9 +646,9 @@ class _ApprovedFragmentState extends State<ApprovedFragment> {
                                             ],
                                           ),
                                         ),
-                                      )
-                                    ],
-                                  ),
+                                      ),
+                                    )
+                                  ],
                                 ),
                               ),
                               Container(

@@ -5,7 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:parkey_employee/Fragment/entry_fragment.dart';
 import 'package:parkey_employee/Fragment/exit_fragment_base.dart';
+import 'package:parkey_employee/Fragment/scan_fragment.dart';
 import 'package:parkey_employee/colors/CustomColors.dart';
+import 'package:parkey_employee/screens/scan_number_plate.dart';
 import 'package:parkey_employee/screens/scan_qr.dart';
 
 import '../Fragment/HomeFragment.dart';
@@ -28,6 +30,7 @@ class _HomeScreenState extends State<HomeScreen> {
   PageController _pageController = PageController();
   late int currentExitFragment;
   double parentHeight = 0.0;
+  int scanIndex = 0;
 
   @override
   void initState() {
@@ -65,8 +68,10 @@ class _HomeScreenState extends State<HomeScreen> {
               },
               children: [
                 HomeFragment(controller: _pageController),
-                ScanQrScreen(controller: _pageController),
-                ApprovedFragmentBase(controller: _pageController),
+                ScanFragment(controller: _pageController, scanIndex: scanIndex),
+                ApprovedFragmentBase(controller: _pageController, setScanIndex: (index){
+                  setScanIndex(index);
+                }),
                 HistoryFragment(context: context),
                 ExitFragmentBase(controller: _pageController),
               ],
@@ -158,6 +163,14 @@ class _HomeScreenState extends State<HomeScreen> {
     return (await fi.image.toByteData(format: ui.ImageByteFormat.png))!
         .buffer
         .asUint8List();
+  }
+  
+  setScanIndex(index){
+    
+    setState(() {
+      scanIndex = index;
+    });
+    
   }
 
   void initialiseUI() {}
