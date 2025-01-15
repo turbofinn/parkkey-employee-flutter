@@ -925,6 +925,8 @@ class _ExitVehicleFragment1State extends State<ExitVehicleFragment1> {
           await SharedPreferences.getInstance();
 
       String? accessToken = sharedPreferences.getString(Constants.ACCESS_TOKEN);
+      String? employeeID = sharedPreferences.getString(Constants.EMPLOYEE_ID);
+
 
       final dio = Dio(BaseOptions(contentType: "application/json"));
       dio.interceptors.add(AuthInterceptor(accessToken!));
@@ -934,7 +936,7 @@ class _ExitVehicleFragment1State extends State<ExitVehicleFragment1> {
       final ApiService apiService = ApiService(dio);
 
       final ExitOtpResponse response =
-          await apiService.verifyExitOtp(OtpExitRequest(otp));
+          await apiService.verifyExitOtp(OtpExitRequest(otp, employeeID!));
       if (response.message == null) {
         print('otp call done' + response.parkingTicketID!);
         final ParkingChargesResponse parkingChargesResponse =
@@ -942,7 +944,7 @@ class _ExitVehicleFragment1State extends State<ExitVehicleFragment1> {
 
         setState(() {
           pinController.clear();
-          charges = parkingChargesResponse.parkingCharges;
+          charges = parkingChargesResponse.totalParkingCharges;
           parkingTicketID = response.parkingTicketID!;
           vehicleNumberInputController.setText(response.vehicleNo!);
           isConfirmedTicketFromQR1 = true;
@@ -1007,7 +1009,7 @@ class _ExitVehicleFragment1State extends State<ExitVehicleFragment1> {
 
         setState(() {
           isConfirmedTicketFromQR = true;
-          charges = parkingChargesResponse.parkingCharges;
+          charges = parkingChargesResponse.totalParkingCharges;
           payFromWallet = parkingChargesResponse.payFromWallet;
         });
       } catch (e) {
@@ -1030,7 +1032,7 @@ class _ExitVehicleFragment1State extends State<ExitVehicleFragment1> {
 
         setState(() {
           isConfirmedTicket = true;
-          charges = parkingChargesResponse.parkingCharges;
+          charges = parkingChargesResponse.totalParkingCharges;
           payFromWallet = parkingChargesResponse.payFromWallet;
         });
         print(e.toString());

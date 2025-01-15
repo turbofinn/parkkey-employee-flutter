@@ -360,10 +360,14 @@ class _ApiService implements ApiService {
   }
 
   @override
-  Future<GetTicketResponse> getTicket(String parkingTicketID) async {
+  Future<GetTicketResponse> getTicket(
+    String parkingTicketID,
+    String employeeID,
+  ) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{
-      r'parkingTicketID': parkingTicketID
+      r'parkingTicketID': parkingTicketID,
+      r'employeeID': employeeID,
     };
     final _headers = <String, dynamic>{};
     final Map<String, dynamic>? _data = null;

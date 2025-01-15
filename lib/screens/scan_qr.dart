@@ -204,13 +204,19 @@ class _ScanQrScreenState extends State<ScanQrScreen> {
 
       print('parking---' + parkingTicketID);
     try {
-      final GetTicketResponse response = await apiService.getTicket(parkingTicketID);
+      final GetTicketResponse response = await apiService.getTicket(parkingTicketID, employeeID!);
       print('getticketresponse--' + response.toString());
       if (response.parkingStatus == Constants.IN_PROGRESS) {
         sharedPreferences.setBool(Constants.IS_TICKET_CONFIRMED, true);
         sharedPreferences.setString(Constants.PARKING_TICKET_ID_AUTO, parkingTicketID);
         sharedPreferences.setString(Constants.VEHICLE_NUMBER, response.vehicleNo);
         sharedPreferences.setString(Constants.MOBILE_NUMBER, response.mobileNo);
+        // Interpret `payFromWallet` to determine payment mode
+        // String paymentMode = response.payFromWallet == true ? "Wallet" : "Cash";
+         // Store paymentMode and initialCharges in SharedPreferences
+        // sharedPreferences.setString(Constants.PAYMENT_MODE, paymentMode);
+        // sharedPreferences.setString(Constants.INITIAL_CHARGES, response.initialCharge ?? "0");
+         
         widget.controller.jumpToPage(2);
         // Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_)=>HomeScreen(2,0)));
       }

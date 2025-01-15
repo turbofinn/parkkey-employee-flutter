@@ -63,7 +63,11 @@ abstract class ApiService{
   Future<ParkingChargesResponse> getParkingCharges(@Query('parkingTicketID') String parkingTicketID);
 
   @GET('/ticket-handler/get-ticket')
-  Future<GetTicketResponse> getTicket(@Query('parkingTicketID') String parkingTicketID);
+Future<GetTicketResponse> getTicket(
+  @Query('parkingTicketID') String parkingTicketID,
+  @Query('employeeID') String employeeID,  // New parameter
+);
+
 
 
 }

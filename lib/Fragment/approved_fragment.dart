@@ -918,8 +918,12 @@ class _ApprovedFragmentState extends State<ApprovedFragment> {
       
        // Retrieve unmasked number and mask it for display
         unmaskedMobileNo = sharedPreferences.getString(Constants.MOBILE_NUMBER)!;
-        mobileNumberInputController.setText(CommonUtil().maskNumber(unmaskedMobileNo).substring(3));
-        
+        mobileNumberInputController.setText(unmaskedMobileNo!=null?CommonUtil().maskNumber(unmaskedMobileNo).substring(3):"");
+         
+      // Retrieve payment details from SharedPreferences
+      // initialCharges = sharedPreferences.getString(Constants.INITIAL_CHARGES) ?? "0";
+      // paymentMode = sharedPreferences.getString(Constants.PAYMENT_MODE) ?? "Cash"; 
+      
       sharedPreferences.setString(Constants.VEHICLE_NUMBER, "");
       sharedPreferences.setString(Constants.MOBILE_NUMBER, "");
     });

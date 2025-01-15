@@ -9,9 +9,11 @@ part of 'otp_exit_request.dart';
 OtpExitRequest _$OtpExitRequestFromJson(Map<String, dynamic> json) =>
     OtpExitRequest(
       json['exitOTP'] as String,
+      json['employeeID'] as String,
     );
 
 Map<String, dynamic> _$OtpExitRequestToJson(OtpExitRequest instance) =>
     <String, dynamic>{
       'exitOTP': instance.exitOTP,
+      'employeeID': instance.employeeID,
     };
