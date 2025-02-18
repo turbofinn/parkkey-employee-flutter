@@ -51,6 +51,7 @@ class _ApprovedFragmentState extends State<ApprovedFragment> {
   bool isError = false;
   String vehicleNo = "";
   String? mobileNo = "";
+  String? maskedMobileNo = "";
   bool isFetchingMNo = false;
   static String initialCharges = "";
   static String paymentMode = "";
@@ -808,7 +809,7 @@ class _ApprovedFragmentState extends State<ApprovedFragment> {
                                           } else {
                                             createCustomer(
                                                 vehicleNumberInputController.text,
-                                                mobileNo!);
+                                                mobileNo! == "" ? mobileNumberInputController.text! : mobileNo!);
                                           }
                                         },
                                         child: Padding(
