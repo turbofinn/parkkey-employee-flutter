@@ -18,6 +18,8 @@ GetTicketResponse _$GetTicketResponseFromJson(Map<String, dynamic> json) =>
       parkDate: json['parkDate'] as String?,
       exitOTP: json['exitOTP'] as String?,
       customerName: json['customerName'] as String?,
+      payFromWallet: json['payFromWallet'] as bool?,
+      initialCharge: json['initialCharge'] as String?,
     );
 
 Map<String, dynamic> _$GetTicketResponseToJson(GetTicketResponse instance) =>
@@ -32,4 +34,6 @@ Map<String, dynamic> _$GetTicketResponseToJson(GetTicketResponse instance) =>
       'parkDate': instance.parkDate,
       'exitOTP': instance.exitOTP,
       'customerName': instance.customerName,
+      'payFromWallet': instance.payFromWallet,
+      'initialCharge': instance.initialCharge,
     };

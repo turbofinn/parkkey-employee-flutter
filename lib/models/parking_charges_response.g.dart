@@ -12,6 +12,7 @@ ParkingChargesResponse _$ParkingChargesResponseFromJson(
       json['parkedDuration'] as String,
       json['parkingCharges'] as String,
       json['payFromWallet'] as bool,
+      json['totalParkingCharges'] as String,
     );
 
 Map<String, dynamic> _$ParkingChargesResponseToJson(
@@ -20,4 +21,5 @@ Map<String, dynamic> _$ParkingChargesResponseToJson(
       'parkedDuration': instance.parkedDuration,
       'parkingCharges': instance.parkingCharges,
       'payFromWallet': instance.payFromWallet,
+      'totalParkingCharges': instance.totalParkingCharges,
     };

@@ -9,6 +9,7 @@ import 'package:parkey_employee/models/send_otp_request.dart';
 import 'package:parkey_employee/models/verify_otp_request.dart';
 import 'package:parkey_employee/models/verify_otp_response.dart';
 import 'package:parkey_employee/models/response.dart';
+import 'package:retrofit/error_logger.dart';
 import 'package:retrofit/http.dart';
 import '../models/create_customer_request.dart';
 import '../models/create_customer_response.dart';
@@ -24,7 +25,9 @@ part 'api_service.g.dart';
 
 @RestApi(baseUrl: 'https://xkzd75f5kd.execute-api.ap-south-1.amazonaws.com/prod')
 abstract class ApiService{
-  factory ApiService(Dio dio) = _ApiService;
+  factory ApiService(Dio dio, {
+  String? baseUrl,
+  ParseErrorLogger? errorLogger}) = _ApiService;
 
   @POST('/login-service/send-otp')
   Future<SendOtpResponse> getOtp(@Body() SendOtpRequest sendOtpRequest);
@@ -63,7 +66,11 @@ abstract class ApiService{
   Future<ParkingChargesResponse> getParkingCharges(@Query('parkingTicketID') String parkingTicketID);
 
   @GET('/ticket-handler/get-ticket')
-  Future<GetTicketResponse> getTicket(@Query('parkingTicketID') String parkingTicketID);
+Future<GetTicketResponse> getTicket(
+  @Query('parkingTicketID') String parkingTicketID,
+  @Query('employeeID') String employeeID  // New parameter
+);
+
 
 
 }

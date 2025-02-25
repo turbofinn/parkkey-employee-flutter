@@ -11,10 +11,13 @@ class ParkingChargesResponse {
   String parkingCharges;
   @JsonKey(name: 'payFromWallet')
   bool payFromWallet;
+  @JsonKey(name: 'totalParkingCharges')  // New field
+  String totalParkingCharges;
+
 
 
   ParkingChargesResponse(
-      this.parkedDuration, this.parkingCharges, this.payFromWallet);
+      this.parkedDuration, this.parkingCharges, this.payFromWallet,this.totalParkingCharges);
 
   factory ParkingChargesResponse.fromJson(Map<String, dynamic> json) => _$ParkingChargesResponseFromJson(json);
 

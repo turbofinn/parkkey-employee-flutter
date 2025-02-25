@@ -204,7 +204,7 @@ class _ScanQrScreenState extends State<ScanQrScreen> {
 
       print('parking---' + parkingTicketID);
     try {
-      final GetTicketResponse response = await apiService.getTicket(parkingTicketID);
+      final GetTicketResponse response = await apiService.getTicket(parkingTicketID, employeeID!);
       print('getticketresponse--' + response.toString());
       if (response.parkingStatus == Constants.IN_PROGRESS) {
         sharedPreferences.setBool(Constants.IS_TICKET_CONFIRMED, true);

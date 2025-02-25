@@ -50,8 +50,9 @@ class _ApprovedFragmentState extends State<ApprovedFragment> {
   bool isLoadingList = true;
   bool isError = false;
   String vehicleNo = "";
-  String? mobileNo = "";
-  String? maskedMobileNo = "";
+  String mobileNo = "";
+  String unmaskedMobileNo = ""; // To store the unmasked number for API use
+
   bool isFetchingMNo = false;
   static String initialCharges = "";
   static String paymentMode = "";
@@ -869,14 +870,20 @@ class _ApprovedFragmentState extends State<ApprovedFragment> {
       try {
         final ApiService apiService = ApiService(dio);
 
+         // Prioritize unmasked `mobileNo` if available; fallback to the text in `mobileNumberInputController`
+      final String enteredMobileNo = unmaskedMobileNo.isNotEmpty
+    ? unmaskedMobileNo
+    : mobileNumberInputController.text;
+
         final CreateCustomerResponse response = await apiService.createCustomer(
-            CreateCustomerRequest('EMPLOYEE_APP', mobileNumber, vehicleNumber, employeeID!));
-        if(response.parkingTicketID == null){
+            CreateCustomerRequest(
+                'EMPLOYEE_APP', enteredMobileNo, vehicleNumber, employeeID!));
+        if (response.parkingTicketID == null) {
           CommonUtil().showToast("Vehicle Already Parked");
           setState(() {
             isLoading = false;
           });
-          return ;
+          return;
         }
         print('userid-----' + response.parkingTicketID!);
         if (response.vehicleNo != null) {
@@ -885,12 +892,28 @@ class _ApprovedFragmentState extends State<ApprovedFragment> {
           sharedPreferences.setString(Constants.VEHICLE_ID, response.vehicleID);
           sharedPreferences.setString(
               Constants.VEHICLE_NUMBER, response.vehicleNo);
+          // Set initial charges and payment mode in SharedPreferences
+        sharedPreferences.setString(Constants.INITIAL_CHARGES, response.initialCharge);
+        sharedPreferences.setString(Constants.PAYMENT_MODE, response.paymentMode);
+
+        // Set the variables for display
+        setState(() {
+          initialCharges = response.initialCharge;
+          paymentMode = response.paymentMode;
+        });
+
+        print('Initial Charges createCustomer: ${response.initialCharge}');
+        print('Payment Mode createCustome: ${response.paymentMode}');
         }
+
         setState(() {
           isLoading = false;
           parkingTicketID = response.parkingTicketID!;
           isConfirmedTicket = true;
         });
+
+     //  populateList();
+
       } on DioException catch (e) {
         if (e.response?.statusCode == 400) {
           String errorMessage = e.response?.data['message'];
@@ -919,8 +942,15 @@ class _ApprovedFragmentState extends State<ApprovedFragment> {
     setState(() {
       vehicleNumberInputController
           .setText(sharedPreferences.getString(Constants.VEHICLE_NUMBER)!);
-      mobileNumberInputController
-          .setText(sharedPreferences.getString(Constants.MOBILE_NUMBER)!);
+
+       // Retrieve unmasked number and mask it for display
+        unmaskedMobileNo = sharedPreferences.getString(Constants.MOBILE_NUMBER)!;
+        mobileNumberInputController.setText(unmaskedMobileNo!=null?CommonUtil().maskNumber(unmaskedMobileNo).substring(3):"");
+
+      // Retrieve payment details from SharedPreferences
+      // initialCharges = sharedPreferences.getString(Constants.INITIAL_CHARGES) ?? "0";
+      // paymentMode = sharedPreferences.getString(Constants.PAYMENT_MODE) ?? "Cash";
+
       sharedPreferences.setString(Constants.VEHICLE_NUMBER, "");
       sharedPreferences.setString(Constants.MOBILE_NUMBER, "");
     });
@@ -1226,8 +1256,12 @@ class _ApprovedFragmentState extends State<ApprovedFragment> {
       String? accessToken = sharedPreferences.getString(Constants.ACCESS_TOKEN);
       String? employeeID = sharedPreferences.getString(Constants.EMPLOYEE_ID);
 
-      initialCharges = sharedPreferences.getInt(Constants.INITIAL_CHARGES).toString();
-      paymentMode = sharedPreferences.getString(Constants.PAYMENT_MODE) ?? "Cash";
+      initialCharges =
+          sharedPreferences.getInt(Constants.INITIAL_CHARGES).toString();
+      paymentMode =
+          sharedPreferences.getString(Constants.PAYMENT_MODE)?? "Cash";
+      print('Initial Charges (from populateList): $initialCharges');
+      print('Payment Mode (from populateList): $paymentMode');
 
       try {
         final dio = Dio(BaseOptions(contentType: "application/json"));
@@ -1271,13 +1305,12 @@ class _ApprovedFragmentState extends State<ApprovedFragment> {
   }
 
   void fetchMobileNo(String vehicleNumber) async {
-    print('Inside FEtch');
+    print('Inside Fetch');
     setState(() {
       isFetchingMNo = true;
     });
     try {
-      SharedPreferences sharedPreferences =
-          await SharedPreferences.getInstance();
+      SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
       String? accessToken = sharedPreferences.getString(Constants.ACCESS_TOKEN);
 
       final dio = Dio(BaseOptions(contentType: "application/json"));
@@ -1287,46 +1320,33 @@ class _ApprovedFragmentState extends State<ApprovedFragment> {
 
       try {
         final response = await apiService.getVehicleDetails(vehicleNumber);
-      try{
-        mobileNumberInputController.setText(CommonUtil().maskNumber(response.mobileNo!).substring(3));
+        if (response.mobileNo != null) {
+          // Store the unmasked mobile number for API usage
+          unmaskedMobileNo = response.mobileNo!;
 
-          mobileNo = response.mobileNo!;
-          setState(() {
-            mobileNo = response.mobileNo!;
-            isFetchingMNo = false;
-          });
-        }catch(e){
-
-          CommonUtil().showToast("Vehicle not present in the system");
-          print(e);
-          setState(() {
-            isFetchingMNo = false;
-            mobileNumberInputController.clear();
-          });
-        }
-          
-        
-        
-      } on DioException catch (e) {
-        if (e.response?.statusCode == 400) {
-          String errorMessage = e.response?.data['message'];
-          print("errorMessage---" + errorMessage.toString());
-          CommonUtil().showToast(errorMessage);
+          // Display only the masked version in the TextField
+          mobileNumberInputController.text = CommonUtil().maskNumber(unmaskedMobileNo).substring(3);
         } else {
-          CommonUtil().showToast(Constants.GENERIC_ERROR_MESSAGE);
+          // Clear the mobile number to allow manual entry
+          mobileNumberInputController.clear();
+          unmaskedMobileNo = "";  // Reset if not found
+          CommonUtil().showToast("Vehicle not present in the system. Please enter manually.");
         }
-        print('error123' + e.toString());
-        setState(() {
-          isFetchingMNo = false;
-        });
-
+      } catch (e) {
+        // Display a message for the manual entry case
+        CommonUtil().showToast("Vehicle not present in the system. Please enter manually.");
+        mobileNumberInputController.clear(); // Clear field to allow typing
+        unmaskedMobileNo = ""; // Reset in case of error
       }
     } catch (e) {
-      print('inside cafch');
+      print('Inside catch block');
+      CommonUtil().showToast(Constants.GENERIC_ERROR_MESSAGE);
+    } finally {
       setState(() {
         isFetchingMNo = false;
       });
-      CommonUtil().showToast(Constants.GENERIC_ERROR_MESSAGE);
     }
   }
+
+
 }

@@ -26,19 +26,26 @@ class GetTicketResponse {
   @JsonKey(name: 'customerName')
   String? customerName;
 
-
+  // New fields for payment information
+   @JsonKey(name: 'payFromWallet')
+  bool? payFromWallet;  // New field
+  @JsonKey(name: 'initialCharge')
+  String? initialCharge;
 
   GetTicketResponse({
-      required this.parkingTicketID,
-      required this.vehicleNo,
-      required this.vehicleType,
-      required this.parkingStatus,
-      required this.mobileNo,
-  this.parkingLocation,
-      this.parkedDuration,
-      this.parkDate,
-      this.exitOTP,
-  this.customerName});
+    required this.parkingTicketID,
+    required this.vehicleNo,
+    required this.vehicleType,
+    required this.parkingStatus,
+    required this.mobileNo,
+    this.parkingLocation,
+    this.parkedDuration,
+    this.parkDate,
+    this.exitOTP,
+    this.customerName,
+   this.payFromWallet,
+    this.initialCharge,
+  });
 
   factory GetTicketResponse.fromJson(Map<String, dynamic> json) => _$GetTicketResponseFromJson(json);
 
